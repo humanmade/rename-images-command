@@ -95,44 +95,29 @@ class Command {
 					continue;
 				}
 
-				WP_CLI::success( sprintf( 'Renamed attachment %d successfully, performing search & replace.', $attachment_id ) );
+				// Get the old and new file names minus the extension for replacement.
+				$ext = pathinfo( $result['old']['file'], PATHINFO_EXTENSION );
+				$old = str_replace( ".$ext", '', $result['old']['file'] );
+				$new = str_replace( ".$ext", '', $result['new']['file'] );
 
-				// Add the full size to the array.
-				$result['old']['sizes']['full'] = [
-					'file' => $result['old']['file'],
-				];
-				$result['new']['sizes']['full'] = [
-					'file' => $result['new']['file'],
-				];
+				WP_CLI::success( sprintf( 'Renamed attachment %d successfully, performing search & replace: %s -> %s', $attachment_id, $old, $new ) );
 
 				// Store all update queries into one transaction per image.
 				$wpdb->query( 'START TRANSACTION;' );
 
-				// Run search replace against each image size.
-				foreach ( $result['old']['sizes'] as $size => $size_data ) {
-					if ( ! isset( $result['new']['sizes'][ $size ] ) ) {
-						WP_CLI::error( sprintf( '  - Size "%s" does not exist for updated attachment %d', $size, $attachment_id ), false );
-						continue;
-					}
-
-					WP_CLI::log( sprintf( '  - Making replacements for size "%s" %s -> %s', $size, $size_data['file'], $result['new']['sizes'][ $size ]['file'] ) );
-
-					// Run search & replace.
-					$search_replace(
-						array_merge( [
-							// Old.
-							$size_data['file'],
-							// New.
-							$result['new']['sizes'][ $size ]['file'],
-						], $tables ),
-						// Associative array args / command flags.
-						[
-							'include-columns' => $assoc_args['include-columns'],
-							'quiet' => true,
-							'network' => $assoc_args['network'],
-						]
-					);
-				}
+				// Run search & replace.
+				$search_replace(
+					array_merge( [
+						$old,
+						$new,
+					], $tables ),
+					// Associative array args / command flags.
+					[
+						'include-columns' => $assoc_args['include-columns'],
+						'quiet' => true,
+						'network' => $assoc_args['network'],
+					]
+				);
 
 				// Commit the updates.
 				$wpdb->query( 'COMMIT;' );
