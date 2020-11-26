@@ -7,6 +7,8 @@
 
 namespace HM\Rename_Images;
 
+use WP_CLI;
+
 require_once __DIR__ . '/inc/class-command.php';
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
