@@ -1,0 +1,17 @@
+{
+    "name": "humanmade/rename-images-command",
+    "type": "wp-cli-package",
+    "description": "Image renaming command for WordPress",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+      {
+        "name": "Human Made",
+        "email": "hello@humanmade.com"
+      }
+    ],
+    "autoload": {
+        "files": [
+            "plugin.php"
+        ]
+    }
+}
